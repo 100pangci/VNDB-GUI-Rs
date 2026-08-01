@@ -1,14 +1,16 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 import ReleaseRow from "./components/ReleaseRow.vue";
 import CandidateDialog from "./components/CandidateDialog.vue";
 import CustomFormatDialog from "./components/CustomFormatDialog.vue";
 import {
+  PALETTES,
   candidateState,
   cancelCandidates,
   chooseCandidate,
   copyFilename,
   copySimplifiedTitle,
+  currentPalette,
   initConfig,
   isDark,
   linkState,
@@ -18,12 +20,14 @@ import {
   previewFilename,
   search,
   selectNonZh,
+  selectPalette,
   selectZh,
   state,
   toggleTheme,
 } from "./core/store";
 
 const formatOpen = ref(false);
+const paletteOpen = ref(false);
 const PROJECT_URL = "https://github.com/100pangci/VNDB-GUI";
 
 const previewText = computed(() => {
@@ -38,19 +42,76 @@ function setTitleMode(useRelease: boolean) {
   state.useReleaseTitle = useRelease;
 }
 
-onMounted(initConfig);
+function onDocClick(e: MouseEvent) {
+  const target = e.target as HTMLElement;
+  if (paletteOpen.value && !target.closest(".palette-wrap")) {
+    paletteOpen.value = false;
+  }
+}
+
+function onDocKey(e: KeyboardEvent) {
+  if (e.key === "Escape") paletteOpen.value = false;
+}
+
+onMounted(() => {
+  document.addEventListener("click", onDocClick);
+  document.addEventListener("keydown", onDocKey);
+  initConfig();
+});
+
+onUnmounted(() => {
+  document.removeEventListener("click", onDocClick);
+  document.removeEventListener("keydown", onDocKey);
+});
 </script>
 
 <template>
   <div class="app">
     <header class="header">
-      <div class="header-text">
-        <h1 class="app-title">VNDB <span class="title-accent">视觉小说文件名生成器</span></h1>
-        <p class="subtitle">输入 VNDB ID（如 v2622）或游戏原名，自动生成标准文件名</p>
+      <div class="brand">
+        <div class="logo" aria-hidden="true">V</div>
+        <div class="brand-text">
+          <h1 class="app-title">VNDB <span class="title-accent">视觉小说文件名生成器</span></h1>
+          <p class="subtitle">输入 VNDB ID（如 v2622）或游戏原名，自动生成标准文件名</p>
+        </div>
       </div>
-      <button class="theme-toggle" @click="toggleTheme">
-        {{ isDark ? "☀ 浅色" : "🌙 深色" }}
-      </button>
+      <div class="header-actions">
+        <div class="palette-wrap">
+          <button
+            class="palette-btn"
+            :class="{ open: paletteOpen }"
+            @click.stop="paletteOpen = !paletteOpen"
+          >
+            <span class="palette-btn-dot" :style="{ background: currentPalette.dark }"></span>
+            配色
+          </button>
+          <Transition name="fade">
+            <div v-if="paletteOpen" class="palette-pop">
+              <div class="palette-title">配色方案</div>
+              <div class="palette-grid">
+                <button
+                  v-for="p in PALETTES"
+                  :key="p.id"
+                  class="palette-item"
+                  :class="{ active: p.id === state.palette }"
+                  @click.stop="selectPalette(p.id)"
+                >
+                  <span class="swatch">
+                    <span class="swatch-dot dark" :style="{ background: p.dark }"></span>
+                    <span class="swatch-dot light" :style="{ background: p.light }"></span>
+                  </span>
+                  <span class="palette-name">{{ p.name }}</span>
+                  <span v-if="p.id === state.palette" class="palette-check">✓</span>
+                </button>
+              </div>
+            </div>
+          </Transition>
+        </div>
+        <button class="theme-toggle" @click="toggleTheme">
+          <span class="theme-icon">{{ isDark ? "☀" : "🌙" }}</span>
+          {{ isDark ? "浅色" : "深色" }}
+        </button>
+      </div>
     </header>
 
     <section class="query-card">
@@ -148,8 +209,8 @@ onMounted(initConfig);
       <div class="preview-body">
         <div class="preview-box">{{ previewText }}</div>
         <div class="copy-col">
-          <button class="btn copy-btn" @click="copyFilename()">一键复制</button>
           <button class="btn simple-btn" @click="copySimplifiedTitle()">复制简要标题</button>
+          <button class="btn copy-btn" @click="copyFilename()">一键复制</button>
         </div>
       </div>
     </section>

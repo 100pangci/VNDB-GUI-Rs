@@ -22,9 +22,28 @@ export const APP_VERSION = "1.0.0";
 export type ThemeMode = "System" | "Dark" | "Light";
 export type StatusKind = "info" | "success" | "error";
 
+export interface PaletteDef {
+  id: string;
+  name: string;
+  dark: string;
+  light: string;
+}
+
+export const PALETTES: PaletteDef[] = [
+  { id: "default", name: "经典蓝", dark: "#3d8bfd", light: "#2f6fd0" },
+  { id: "violet", name: "紫罗兰", dark: "#9d7bff", light: "#6d5ae0" },
+  { id: "cyan", name: "冰青", dark: "#3dc6ea", light: "#0f9fc2" },
+  { id: "pink", name: "玫红", dark: "#ff7aa2", light: "#e05a84" },
+  { id: "orange", name: "暖橙", dark: "#f5a54a", light: "#d9822f" },
+  { id: "gray", name: "石墨", dark: "#9aa3b2", light: "#5a6170" },
+];
+
+const PALETTE_IDS = new Set(PALETTES.map((p) => p.id));
+
 export interface AppConfig {
   appearance_mode: string;
   format_template: string;
+  color_palette: string;
 }
 
 interface SearchOutcome {
@@ -57,6 +76,7 @@ export const state = reactive({
   sanitizeEnabled: true,
 
   themeMode: "System" as ThemeMode,
+  palette: "default",
   savedFormat: "",
   customTemplate: DEFAULT_FORMAT_TEMPLATE,
 
@@ -90,6 +110,18 @@ watch(
     document.documentElement.dataset.theme = dark ? "dark" : "light";
   },
   { immediate: true },
+);
+
+watch(
+  () => state.palette,
+  (palette) => {
+    document.documentElement.dataset.palette = palette;
+  },
+  { immediate: true },
+);
+
+export const currentPalette = computed(
+  () => PALETTES.find((p) => p.id === state.palette) ?? PALETTES[0],
 );
 
 systemDark.addEventListener("change", () => {
@@ -164,6 +196,9 @@ export async function initConfig() {
   try {
     const cfg = await invoke<AppConfig>("get_config");
     if (cfg.appearance_mode) state.themeMode = cfg.appearance_mode as ThemeMode;
+    if (cfg.color_palette && PALETTE_IDS.has(cfg.color_palette)) {
+      state.palette = cfg.color_palette;
+    }
     if (cfg.format_template) {
       state.customTemplate = cfg.format_template;
       state.savedFormat = cfg.format_template;
@@ -175,12 +210,22 @@ export async function initConfig() {
 
 export function persistConfig() {
   invoke("save_config", {
-    cfg: { appearance_mode: state.themeMode, format_template: state.savedFormat },
+    cfg: {
+      appearance_mode: state.themeMode,
+      format_template: state.savedFormat,
+      color_palette: state.palette,
+    },
   }).catch(() => {});
 }
 
 export function toggleTheme() {
   state.themeMode = isDark.value ? "Light" : "Dark";
+  persistConfig();
+}
+
+export function selectPalette(id: string) {
+  if (!PALETTE_IDS.has(id)) return;
+  state.palette = id;
   persistConfig();
 }
 

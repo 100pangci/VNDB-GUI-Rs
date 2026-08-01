@@ -77,16 +77,15 @@ function restore() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: color-mix(in srgb, var(--bg) 55%, transparent);
-  backdrop-filter: blur(3px);
+  background: color-mix(in srgb, var(--bg) 62%, transparent);
 }
 .dialog-card {
   width: 600px;
   max-width: calc(100vw - 60px);
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 14px;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
   padding: 18px 20px;
 }
 .dialog-title {
@@ -104,37 +103,37 @@ function restore() {
 .var-label {
   font-size: 11px;
   color: var(--muted);
+  margin-right: 2px;
 }
 .var-chip {
-  border: none;
-  background: transparent;
+  border: 1px solid var(--border);
+  background: var(--bg-elev);
   color: var(--accent);
-  text-decoration: underline;
   font-size: 11.5px;
-  font-family: inherit;
+  font-family: var(--font-mono);
+  border-radius: var(--radius-sm);
+  padding: 3px 8px;
   cursor: pointer;
-  padding: 2px 3px;
-  border-radius: 4px;
-  transition: background 0.12s ease;
+  transition: border-color 0.12s ease, background 0.12s ease;
 }
 .var-chip:hover {
-  background: var(--row-hover);
+  border-color: var(--accent);
+  background: var(--accent-soft);
 }
 .format-input {
   width: 100%;
   padding: 9px 12px;
   font-size: 13px;
-  font-family: inherit;
+  font-family: var(--font-mono);
   color: var(--text);
   background: var(--bg-elev);
   border: 1px solid var(--border);
-  border-radius: 9px;
+  border-radius: var(--radius-md);
   outline: none;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition: border-color 0.15s ease;
 }
 .format-input:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-glow);
 }
 .dialog-actions {
   display: flex;

@@ -10,10 +10,16 @@ pub struct AppConfig {
     pub appearance_mode: String,
     #[serde(default)]
     pub format_template: String,
+    #[serde(default = "default_palette")]
+    pub color_palette: String,
 }
 
 fn default_mode() -> String {
     "System".to_string()
+}
+
+fn default_palette() -> String {
+    "default".to_string()
 }
 
 impl Default for AppConfig {
@@ -21,6 +27,7 @@ impl Default for AppConfig {
         Self {
             appearance_mode: default_mode(),
             format_template: String::new(),
+            color_palette: default_palette(),
         }
     }
 }

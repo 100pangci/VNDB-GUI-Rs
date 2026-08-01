@@ -54,8 +54,7 @@ function displayText(c: VNCandidate): string {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: color-mix(in srgb, var(--bg) 55%, transparent);
-  backdrop-filter: blur(3px);
+  background: color-mix(in srgb, var(--bg) 62%, transparent);
 }
 .dialog-card {
   width: 600px;
@@ -65,8 +64,8 @@ function displayText(c: VNCandidate): string {
   flex-direction: column;
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 14px;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
   padding: 18px 20px;
 }
 .dialog-title {
@@ -79,8 +78,8 @@ function displayText(c: VNCandidate): string {
   min-height: 0;
   overflow-y: auto;
   border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 6px;
+  border-radius: var(--radius-md);
+  padding: 5px;
   background: var(--bg-elev);
 }
 .candidate-btn {
@@ -89,7 +88,7 @@ function displayText(c: VNCandidate): string {
   text-align: left;
   padding: 7px 10px;
   border: none;
-  border-radius: 7px;
+  border-radius: var(--radius-sm);
   background: transparent;
   color: var(--text);
   font-size: 12px;

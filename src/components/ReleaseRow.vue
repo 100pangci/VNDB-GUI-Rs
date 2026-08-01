@@ -49,11 +49,11 @@ const info = computed(() => {
   display: flex;
   align-items: stretch;
   gap: 6px;
-  padding: 7px 8px 7px 4px;
-  border-radius: 8px;
+  padding: 6px 8px 6px 4px;
+  border-radius: var(--radius-sm);
   background: var(--row-bg);
   cursor: pointer;
-  transition: background 0.15s ease, transform 0.1s ease;
+  transition: background 0.12s ease;
   user-select: none;
 }
 .release-row:hover {
@@ -65,7 +65,7 @@ const info = computed(() => {
 
 .indicator {
   flex: 0 0 3px;
-  border-radius: 2px;
+  border-radius: 1px;
   background: transparent;
   align-self: stretch;
 }
@@ -85,6 +85,9 @@ const info = computed(() => {
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: 1.5;
+}
+.release-row.selected .row-title {
+  color: var(--accent);
 }
 .row-info {
   font-size: 11px;
