@@ -72,7 +72,7 @@ onUnmounted(() => {
         <div class="logo" aria-hidden="true">V</div>
         <div class="brand-text">
           <h1 class="app-title">VNDB <span class="title-accent">视觉小说文件名生成器</span></h1>
-          <p class="subtitle">输入 VNDB ID（如 v2622）或游戏原名，自动生成标准文件名</p>
+          <p class="subtitle">输入 VNDB ID 或游戏原名，自动生成标准文件名</p>
         </div>
       </div>
       <div class="header-actions">
@@ -118,7 +118,7 @@ onUnmounted(() => {
       <input
         v-model="state.query"
         class="query-input"
-        placeholder="输入 VNDB ID（如 v2622）或游戏原名…"
+        placeholder="输入 VNDB ID 或游戏原名…"
         spellcheck="false"
         @keyup.enter="search()"
       />
@@ -190,7 +190,7 @@ onUnmounted(() => {
           id="group-input"
           v-model="state.groupName"
           class="group-input"
-          placeholder="如：Makura Castle（点击中文发行列表自动填入）"
+          placeholder="如：XXX汉化组（点击中文发行列表自动填入）"
           spellcheck="false"
         />
       </div>

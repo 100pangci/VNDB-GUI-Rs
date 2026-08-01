@@ -39,6 +39,9 @@ jobs:
       - name: 前端构建检查
         run: npm run build
 
+      - name: 前端单元测试
+        run: npm test
+
       - name: 运行 Rust 测试
         run: cargo test --manifest-path src-tauri/Cargo.toml
 
