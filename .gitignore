@@ -1,0 +1,48 @@
+# Dependencies
+node_modules/
+
+# Frontend build output
+dist/
+
+# Rust / Tauri build output
+src-tauri/target/
+src-tauri/gen/
+
+# Release artifacts (portable builds)
+release/
+*.exe
+
+# Logs
+*.log
+pip-log.txt
+
+# Temporary files
+*.tmp
+*.temp
+*~
+
+# IDE / editor files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Local settings
+*.local
+local_settings.py
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+
+# Vim
+*.swp
+*.swo
+
+# Test / coverage
+.coverage
+.pytest_cache/
+htmlcov/
