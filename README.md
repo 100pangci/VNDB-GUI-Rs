@@ -69,7 +69,7 @@ npm run tauri dev
 npm run portable
 ```
 
-脚本会构建 release 版（不生成安装包）并压缩为 `release/VNDB-GUI-1.0.0-win64.zip`，解压即用。
+脚本会构建 release 版（不生成安装包）并压缩为 `release/VNDB-GUI-1.0.1-win64.zip`，解压即用。
 
 ## 📂 项目结构
 

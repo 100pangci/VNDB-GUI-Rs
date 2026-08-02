@@ -147,6 +147,7 @@ body {
   background: var(--bg);
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
 /* ── 布局 ─────────────────────────────────────────────── */
@@ -193,6 +194,7 @@ body {
   min-width: 0;
 }
 .logo {
+  position: relative;
   flex: 0 0 auto;
   width: 38px;
   height: 38px;
@@ -203,8 +205,20 @@ body {
   font-weight: 700;
   font-family: var(--font-mono);
   color: #fff;
-  background: var(--accent);
+  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
   border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: background 0.3s ease;
+}
+.logo::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 45%;
+  background: linear-gradient(105deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+  transform: translateX(-350%) skewX(-20deg);
+  animation: logo-shine 4.5s ease-in-out infinite;
 }
 .brand-text {
   min-width: 0;
@@ -246,8 +260,10 @@ body {
   background: var(--card-2);
 }
 .theme-icon {
+  display: inline-block;
   font-size: 13px;
   line-height: 1;
+  animation: theme-in 0.4s ease;
 }
 
 /* ── Header actions / 配色选择 ────────────────────────── */
@@ -396,12 +412,16 @@ body {
 }
 .query-input:focus {
   border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 .search-btn {
   background: var(--success);
   height: 36px;
   padding: 0 20px;
   font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
 }
 .search-btn:hover:not(:disabled) {
   background: var(--success-strong);
@@ -414,6 +434,7 @@ body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  animation: status-in 0.3s ease;
 }
 .status-info {
   color: var(--muted);
@@ -567,6 +588,7 @@ body {
 }
 .group-input:focus {
   border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 /* ── Preview card ─────────────────────────────────────── */
@@ -654,6 +676,7 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: 1.7;
+  animation: preview-in 0.35s ease;
 }
 .copy-col {
   flex: 0 0 auto;
@@ -801,4 +824,190 @@ body {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+/* ═══════════════════════════════════════════════════════
+   动效（前端动画）
+   ═══════════════════════════════════════════════════════ */
+
+/* 主题切换时卡片颜色平滑过渡 */
+.query-card,
+.panel,
+.manual-card,
+.preview-card {
+  transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* 页面卡片错峰入场 */
+.app .query-card {
+  animation: rise-in 0.45s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+.app .panels {
+  animation: rise-in 0.45s cubic-bezier(0.2, 0.7, 0.3, 1) 0.07s both;
+}
+.app .manual-card {
+  animation: rise-in 0.45s cubic-bezier(0.2, 0.7, 0.3, 1) 0.14s both;
+}
+.app .preview-card {
+  animation: rise-in 0.45s cubic-bezier(0.2, 0.7, 0.3, 1) 0.21s both;
+}
+.app .footer {
+  animation: rise-in 0.45s cubic-bezier(0.2, 0.7, 0.3, 1) 0.28s both;
+}
+
+/* 发行列表增删移动 */
+.row-enter-active {
+  animation: row-in 0.3s ease both;
+}
+.row-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.row-leave-to {
+  opacity: 0;
+  transform: translateX(-12px);
+}
+.row-move {
+  transition: transform 0.3s ease;
+}
+
+/* 弹窗 / 浮层（缩放 + 淡入） */
+.pop-enter-active,
+.pop-leave-active {
+  transition: opacity 0.18s ease, transform 0.18s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+.pop-enter-from {
+  opacity: 0;
+  transform: translateY(-8px) scale(0.96);
+}
+.pop-leave-to {
+  opacity: 0;
+  transform: translateY(-4px) scale(0.97);
+}
+
+/* 搜索按钮加载中 */
+.spinner {
+  width: 13px;
+  height: 13px;
+  flex: 0 0 auto;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+/* 复制成功反馈 */
+.copy-btn.done {
+  background: var(--success);
+  animation: pop-bounce 0.35s ease;
+}
+.simple-btn.done {
+  background: var(--accent);
+  color: #fff;
+  animation: pop-bounce 0.35s ease;
+}
+
+/* 链接按钮待打开状态 */
+.link-btn.waiting {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  animation: waiting-pulse 1.2s ease infinite;
+}
+
+/* 配色勾选出现 */
+.palette-check {
+  animation: pop-bounce 0.3s ease;
+}
+
+/* ── Keyframes ────────────────────────────────────────── */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes row-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes pop-bounce {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.06);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes theme-in {
+  from {
+    transform: rotate(-120deg) scale(0.6);
+    opacity: 0;
+  }
+  to {
+    transform: rotate(0) scale(1);
+    opacity: 1;
+  }
+}
+@keyframes status-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes preview-in {
+  from {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+  }
+}
+@keyframes logo-shine {
+  0%,
+  50% {
+    transform: translateX(-350%) skewX(-20deg);
+  }
+  85%,
+  100% {
+    transform: translateX(250%) skewX(-20deg);
+  }
+}
+@keyframes waiting-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 35%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 5px transparent;
+  }
+}
+
+/* 无障碍：尊重系统减弱动效设置 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

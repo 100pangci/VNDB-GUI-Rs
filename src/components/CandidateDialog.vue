@@ -23,15 +23,16 @@ function displayText(c: VNCandidate): string {
 
 <template>
   <Teleport to="body">
-    <Transition name="fade">
+    <Transition name="pop">
       <div class="dialog-overlay" @click.self="$emit('cancel')">
         <div class="dialog-card">
           <div class="dialog-title">找到多个匹配结果，请选择一个：</div>
           <div class="candidate-list">
             <button
-              v-for="c in candidates"
+              v-for="(c, i) in candidates"
               :key="c.id"
               class="candidate-btn"
+              :style="{ animationDelay: `${i * 30}ms` }"
               @click="$emit('select', c)"
             >
               {{ displayText(c) }}
@@ -55,6 +56,7 @@ function displayText(c: VNCandidate): string {
   align-items: center;
   justify-content: center;
   background: color-mix(in srgb, var(--bg) 62%, transparent);
+  backdrop-filter: blur(4px);
 }
 .dialog-card {
   width: 600px;
@@ -97,10 +99,22 @@ function displayText(c: VNCandidate): string {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  transition: background 0.12s ease;
+  transition: background 0.12s ease, transform 0.12s ease;
+  animation: candidate-in 0.25s ease backwards;
 }
 .candidate-btn:hover {
   background: var(--row-hover);
+  transform: translateX(3px);
+}
+@keyframes candidate-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 .dialog-actions {
   display: flex;

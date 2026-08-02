@@ -1,6 +1,6 @@
 [package]
 name = "vndb-gui"
-version = "1.0.0"
+version = "1.0.1"
 description = "VNDB 视觉小说文件名生成器"
 authors = ["100pangci"]
 edition = "2021"

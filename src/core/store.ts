@@ -16,8 +16,8 @@ import { generateCustomFilename, generateFilename, sanitizeFilename } from "./fi
 
 export const DEFAULT_FORMAT_TEMPLATE =
   "[{developer}][{date}]{title}[{vid}][{platform}][{group}][{patch_date}][{language}]";
-export const PROJECT_URL = "https://github.com/100pangci/VNDB-GUI";
-export const APP_VERSION = "1.0.0";
+export const PROJECT_URL = "https://github.com/100pangci/VNDB-GUI-Rs";
+export const APP_VERSION = "1.0.1";
 
 export type ThemeMode = "System" | "Dark" | "Light";
 export type StatusKind = "info" | "success" | "error";

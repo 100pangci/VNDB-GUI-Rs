@@ -28,7 +28,19 @@ import {
 
 const formatOpen = ref(false);
 const paletteOpen = ref(false);
-const PROJECT_URL = "https://github.com/100pangci/VNDB-GUI";
+const copiedBtn = ref<"copy" | "simple" | null>(null);
+let copyTimer: ReturnType<typeof setTimeout> | null = null;
+const PROJECT_URL = "https://github.com/100pangci/VNDB-GUI-Rs";
+
+async function onCopy(kind: "copy" | "simple") {
+  if (kind === "copy") await copyFilename();
+  else await copySimplifiedTitle();
+  copiedBtn.value = kind;
+  if (copyTimer) clearTimeout(copyTimer);
+  copyTimer = setTimeout(() => {
+    copiedBtn.value = null;
+  }, 1400);
+}
 
 const previewText = computed(() => {
   if (!state.vnInfo) return "（等待搜索）";
@@ -62,6 +74,7 @@ onMounted(() => {
 onUnmounted(() => {
   document.removeEventListener("click", onDocClick);
   document.removeEventListener("keydown", onDocKey);
+  if (copyTimer) clearTimeout(copyTimer);
 });
 </script>
 
@@ -85,7 +98,7 @@ onUnmounted(() => {
             <span class="palette-btn-dot" :style="{ background: currentPalette.dark }"></span>
             配色
           </button>
-          <Transition name="fade">
+          <Transition name="pop">
             <div v-if="paletteOpen" class="palette-pop">
               <div class="palette-title">配色方案</div>
               <div class="palette-grid">
@@ -108,7 +121,7 @@ onUnmounted(() => {
           </Transition>
         </div>
         <button class="theme-toggle" @click="toggleTheme">
-          <span class="theme-icon">{{ isDark ? "☀" : "🌙" }}</span>
+          <span :key="isDark ? 'light' : 'dark'" class="theme-icon">{{ isDark ? "☀" : "🌙" }}</span>
           {{ isDark ? "浅色" : "深色" }}
         </button>
       </div>
@@ -123,25 +136,27 @@ onUnmounted(() => {
         @keyup.enter="search()"
       />
       <button class="btn search-btn" :disabled="state.searching" @click="search()">
+        <span v-if="state.searching" class="spinner"></span>
         {{ state.searching ? "搜索中…" : "搜索 API" }}
       </button>
-      <span :class="statusClass">{{ state.statusText }}</span>
+      <span :key="state.statusText" :class="statusClass">{{ state.statusText }}</span>
     </section>
 
     <section class="panels">
       <div class="panel">
         <div class="panel-header nonzh-header">非中文发行</div>
-        <div class="release-list">
+        <TransitionGroup tag="div" name="row" class="release-list">
           <ReleaseRow
             v-for="(r, i) in state.nonZh"
             :key="r.id"
+            :style="{ animationDelay: `${Math.min(i, 10) * 22}ms` }"
             :release="r"
             :selected="i === state.selectedNonzhIdx"
             :zh="false"
             @click="selectNonZh(i)"
           />
-          <div v-if="!state.nonZh.length" class="empty-hint">（无发行版本）</div>
-        </div>
+          <div v-if="!state.nonZh.length" key="empty" class="empty-hint">（无发行版本）</div>
+        </TransitionGroup>
         <div class="panel-count">共 {{ state.nonZh.length }} 个版本</div>
       </div>
 
@@ -149,17 +164,18 @@ onUnmounted(() => {
 
       <div class="panel zh-panel">
         <div class="panel-header zh-header">中文发行</div>
-        <div class="release-list">
+        <TransitionGroup tag="div" name="row" class="release-list">
           <ReleaseRow
             v-for="(r, i) in state.zh"
             :key="r.id"
+            :style="{ animationDelay: `${Math.min(i, 10) * 22}ms` }"
             :release="r"
             :selected="i === state.selectedZhIdx"
             :zh="true"
             @click="selectZh(i)"
           />
-          <div v-if="!state.zh.length" class="empty-hint">（无中文版本）</div>
-        </div>
+          <div v-if="!state.zh.length" key="empty" class="empty-hint">（无中文版本）</div>
+        </TransitionGroup>
         <div class="panel-count">共 {{ state.zh.length }} 个版本</div>
       </div>
     </section>
@@ -199,7 +215,7 @@ onUnmounted(() => {
     <section class="preview-card">
       <div class="preview-top">
         <div class="preview-title">文件名预览</div>
-        <button class="btn link-btn" @click="onLinkClick">{{ linkState.text }}</button>
+        <button class="btn link-btn" :class="{ waiting: linkState.waiting }" @click="onLinkClick">{{ linkState.text }}</button>
         <label class="switch">
           <input v-model="state.sanitizeEnabled" type="checkbox" />
           <span class="track"><span class="thumb"></span></span>
@@ -207,10 +223,14 @@ onUnmounted(() => {
         </label>
       </div>
       <div class="preview-body">
-        <div class="preview-box">{{ previewText }}</div>
+        <div :key="previewText" class="preview-box">{{ previewText }}</div>
         <div class="copy-col">
-          <button class="btn simple-btn" @click="copySimplifiedTitle()">复制简要标题</button>
-          <button class="btn copy-btn" @click="copyFilename()">一键复制</button>
+          <button class="btn simple-btn" :class="{ done: copiedBtn === 'simple' }" @click="onCopy('simple')">
+            {{ copiedBtn === "simple" ? "已复制 ✓" : "复制简要标题" }}
+          </button>
+          <button class="btn copy-btn" :class="{ done: copiedBtn === 'copy' }" @click="onCopy('copy')">
+            {{ copiedBtn === "copy" ? "已复制 ✓" : "一键复制" }}
+          </button>
         </div>
       </div>
     </section>

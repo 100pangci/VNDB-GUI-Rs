@@ -162,6 +162,18 @@ jobs:
       - build-macos
 
     steps:
+      - name: 拉取代码
+        uses: actions/checkout@v4
+
+      - name: 提取当前版本的 Changelog 条目
+        run: |
+          TAG=${GITHUB_REF#refs/tags/}
+          awk -v tag="$TAG" '
+            $0 ~ "^## \\[" tag "\\]" { found=1 }
+            found && $0 ~ "^## \\[" && $0 !~ "^## \\[" tag "\\]" { exit }
+            found
+          ' CHANGELOG.md > release_body.md
+
       - name: 下载构建产物
         uses: actions/download-artifact@v4
         with:
@@ -174,4 +186,4 @@ jobs:
             artifacts/windows/vndb-gui-${{ github.ref_name }}-windows.exe
             artifacts/linux/vndb-gui-${{ github.ref_name }}-linux
             artifacts/macos/vndb-gui-${{ github.ref_name }}-macos.zip
-          generate_release_notes: true
+          body_path: release_body.md

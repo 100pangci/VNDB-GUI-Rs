@@ -71,6 +71,15 @@ const info = computed(() => {
 }
 .release-row.selected .indicator {
   background: var(--accent);
+  animation: indicator-in 0.3s ease;
+}
+@keyframes indicator-in {
+  from {
+    transform: scaleY(0.2);
+  }
+  to {
+    transform: scaleY(1);
+  }
 }
 
 .row-body {

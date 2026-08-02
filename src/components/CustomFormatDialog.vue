@@ -36,16 +36,17 @@ function restore() {
 
 <template>
   <Teleport to="body">
-    <Transition name="fade">
+    <Transition name="pop">
       <div class="dialog-overlay" @click.self="$emit('cancel')">
         <div class="dialog-card format-card">
           <div class="dialog-title">自定义文件名拼接格式</div>
           <div class="var-row">
             <span class="var-label">可用变量：</span>
             <button
-              v-for="v in VARS"
+              v-for="(v, i) in VARS"
               :key="v"
               class="var-chip"
+              :style="{ animationDelay: `${i * 20}ms` }"
               @click="insertVar(v)"
             >
               {{ v }}
@@ -78,6 +79,7 @@ function restore() {
   align-items: center;
   justify-content: center;
   background: color-mix(in srgb, var(--bg) 62%, transparent);
+  backdrop-filter: blur(4px);
 }
 .dialog-card {
   width: 600px;
@@ -114,11 +116,25 @@ function restore() {
   border-radius: var(--radius-sm);
   padding: 3px 8px;
   cursor: pointer;
-  transition: border-color 0.12s ease, background 0.12s ease;
+  transition: border-color 0.12s ease, background 0.12s ease, transform 0.1s ease;
+  animation: chip-in 0.25s ease backwards;
 }
 .var-chip:hover {
   border-color: var(--accent);
   background: var(--accent-soft);
+}
+.var-chip:active {
+  transform: scale(0.92);
+}
+@keyframes chip-in {
+  from {
+    opacity: 0;
+    transform: translateY(5px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 .format-input {
   width: 100%;
@@ -134,6 +150,7 @@ function restore() {
 }
 .format-input:focus {
   border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 .dialog-actions {
   display: flex;
