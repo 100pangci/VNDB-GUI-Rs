@@ -37,7 +37,7 @@ function restore() {
 <template>
   <Teleport to="body">
     <Transition name="pop">
-      <div class="dialog-overlay" @click.self="$emit('cancel')">
+      <div class="dialog-overlay">
         <div class="dialog-card format-card">
           <div class="dialog-title">自定义文件名拼接格式</div>
           <div class="var-row">
