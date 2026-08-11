@@ -22,17 +22,17 @@ fn runtime_env_version() -> Option<String> {
     }
 }
 
-/// Return app version: env var (tag) > bundled version.txt > "dev".
+/// Return app version: compile-time env (tag) > runtime env > bundled version.txt > "dev".
 pub fn get_app_version() -> String {
     if let Some(v) = compile_env_version() {
+        return v.trim().to_string();
+    }
+    if let Some(v) = runtime_env_version() {
         return v.trim().to_string();
     }
     let bundled = BUNDLED_VERSION.trim();
     if !bundled.is_empty() {
         return bundled.to_string();
-    }
-    if let Some(v) = runtime_env_version() {
-        return v.trim().to_string();
     }
     DEFAULT_VERSION.to_string()
 }

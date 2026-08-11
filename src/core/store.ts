@@ -16,8 +16,14 @@ import { generateCustomFilename, generateFilename, sanitizeFilename } from "./fi
 
 export const DEFAULT_FORMAT_TEMPLATE =
   "[{developer}][{date}]{title}[{vid}][{platform}][{group}][{patch_date}][{language}]";
+export const DEFAULT_TEMPLATE_NAME = "默认模板";
 export const PROJECT_URL = "https://github.com/100pangci/VNDB-GUI-Rs";
 export const APP_VERSION = "1.0.1";
+
+export interface FormatTemplate {
+  name: string;
+  template: string;
+}
 
 export type ThemeMode = "System" | "Dark" | "Light";
 export type StatusKind = "info" | "success" | "error";
@@ -44,6 +50,8 @@ export interface AppConfig {
   appearance_mode: string;
   format_template: string;
   color_palette: string;
+  format_templates?: FormatTemplate[];
+  format_template_name?: string;
 }
 
 interface SearchOutcome {
@@ -77,8 +85,8 @@ export const state = reactive({
 
   themeMode: "System" as ThemeMode,
   palette: "default",
-  savedFormat: "",
-  customTemplate: DEFAULT_FORMAT_TEMPLATE,
+  formatTemplates: [] as FormatTemplate[],
+  activeFormatName: "",
 
   vnUrl: null as string | null,
 });
@@ -148,12 +156,19 @@ export const baseRelease = computed<VNRelease | null>(() => {
   return null;
 });
 
+export const activeFormat = computed<FormatTemplate | null>(
+  () =>
+    state.formatTemplates.find((t) => t.name === state.activeFormatName) ?? null,
+);
+
+export const savedFormat = computed<string>(() => activeFormat.value?.template ?? "");
+
 export const previewFilename = computed<string>(() => {
   if (!state.vnInfo) return "";
   const base = baseRelease.value;
   if (!base) return "";
-  if (state.savedFormat) {
-    return generateCustomFilename(state.savedFormat, state.vnInfo, base, {
+  if (savedFormat.value) {
+    return generateCustomFilename(savedFormat.value, state.vnInfo, base, {
       groupName: state.groupName,
       patchDate: state.patchDate,
       language: state.language,
@@ -199,20 +214,34 @@ export async function initConfig() {
     if (cfg.color_palette && PALETTE_IDS.has(cfg.color_palette)) {
       state.palette = cfg.color_palette;
     }
-    if (cfg.format_template) {
-      state.customTemplate = cfg.format_template;
-      state.savedFormat = cfg.format_template;
+    if (cfg.format_templates?.length) {
+      state.formatTemplates = cfg.format_templates;
+    } else if (cfg.format_template) {
+      state.formatTemplates = [{ name: DEFAULT_TEMPLATE_NAME, template: cfg.format_template }];
+    } else {
+      state.formatTemplates = [{ name: DEFAULT_TEMPLATE_NAME, template: DEFAULT_FORMAT_TEMPLATE }];
     }
+    state.activeFormatName = state.formatTemplates.some(
+      (t) => t.name === cfg.format_template_name,
+    )
+      ? (cfg.format_template_name as string)
+      : state.formatTemplates[0].name;
   } catch {
     // keep defaults
   }
+  if (!state.formatTemplates.length) {
+    state.formatTemplates = [{ name: DEFAULT_TEMPLATE_NAME, template: DEFAULT_FORMAT_TEMPLATE }];
+  }
+  if (!state.activeFormatName) state.activeFormatName = state.formatTemplates[0].name;
 }
 
 export function persistConfig() {
   invoke("save_config", {
     cfg: {
       appearance_mode: state.themeMode,
-      format_template: state.savedFormat,
+      format_template: savedFormat.value,
+      format_templates: state.formatTemplates,
+      format_template_name: state.activeFormatName,
       color_palette: state.palette,
     },
   }).catch(() => {});
@@ -399,8 +428,8 @@ export function openProjectLink() {
 
 // ── Custom Format ─────────────────────────────────────────────────────
 
-export function onFormatSaved(template: string) {
-  state.savedFormat = template;
-  state.customTemplate = template;
+export function onFormatSaved(templates: FormatTemplate[], activeName: string) {
+  state.formatTemplates = templates;
+  state.activeFormatName = activeName;
   persistConfig();
 }

@@ -5,6 +5,12 @@ use std::fs;
 use std::path::PathBuf;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct FormatTemplate {
+    pub name: String,
+    pub template: String,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct AppConfig {
     #[serde(default = "default_mode")]
     pub appearance_mode: String,
@@ -12,6 +18,10 @@ pub struct AppConfig {
     pub format_template: String,
     #[serde(default = "default_palette")]
     pub color_palette: String,
+    #[serde(default)]
+    pub format_templates: Vec<FormatTemplate>,
+    #[serde(default)]
+    pub format_template_name: String,
 }
 
 fn default_mode() -> String {
@@ -28,6 +38,8 @@ impl Default for AppConfig {
             appearance_mode: default_mode(),
             format_template: String::new(),
             color_palette: default_palette(),
+            format_templates: Vec::new(),
+            format_template_name: String::new(),
         }
     }
 }

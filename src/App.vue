@@ -249,8 +249,9 @@ onUnmounted(() => {
     />
     <CustomFormatDialog
       v-if="formatOpen"
-      :initial="state.customTemplate"
-      @save="(t) => { onFormatSaved(t); formatOpen = false; }"
+      :templates="state.formatTemplates"
+      :active-name="state.activeFormatName"
+      @save="(t, n) => { onFormatSaved(t, n); formatOpen = false; }"
       @cancel="formatOpen = false"
     />
   </div>

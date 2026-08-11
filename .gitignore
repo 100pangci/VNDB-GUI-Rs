@@ -42,6 +42,9 @@ ehthumbs.db
 *.swp
 *.swo
 
+# Local toolchains (downloaded Node, etc.)
+.toolchain/
+
 # Test / coverage
 .coverage
 .pytest_cache/
