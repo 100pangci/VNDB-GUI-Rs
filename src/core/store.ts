@@ -41,7 +41,7 @@ export const PALETTES: PaletteDef[] = [
   { id: "cyan", name: "冰青", dark: "#3dc6ea", light: "#0f9fc2" },
   { id: "pink", name: "玫红", dark: "#ff7aa2", light: "#e05a84" },
   { id: "orange", name: "暖橙", dark: "#f5a54a", light: "#d9822f" },
-  { id: "gray", name: "石墨", dark: "#9aa3b2", light: "#5a6170" },
+  { id: "sakura", name: "樱花", dark: "#ff9db8", light: "#d65a8a" },
 ];
 
 const PALETTE_IDS = new Set(PALETTES.map((p) => p.id));
@@ -211,8 +211,9 @@ export async function initConfig() {
   try {
     const cfg = await invoke<AppConfig>("get_config");
     if (cfg.appearance_mode) state.themeMode = cfg.appearance_mode as ThemeMode;
-    if (cfg.color_palette && PALETTE_IDS.has(cfg.color_palette)) {
-      state.palette = cfg.color_palette;
+    const paletteId = cfg.color_palette === "gray" ? "sakura" : cfg.color_palette;
+    if (paletteId && PALETTE_IDS.has(paletteId)) {
+      state.palette = paletteId;
     }
     if (cfg.format_templates?.length) {
       state.formatTemplates = cfg.format_templates;

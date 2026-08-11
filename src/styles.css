@@ -63,10 +63,10 @@ html[data-theme="dark"][data-palette="orange"] {
   --accent-strong: #d9822f;
   --accent-soft: #3a2a14;
 }
-html[data-theme="dark"][data-palette="gray"] {
-  --accent: #9aa3b2;
-  --accent-strong: #7c8594;
-  --accent-soft: #2a2e38;
+html[data-theme="dark"][data-palette="sakura"] {
+  --accent: #ff9db8;
+  --accent-strong: #e584a4;
+  --accent-soft: #3a2530;
 }
 
 /* ── 浅色主题 ─────────────────────────────────────────── */
@@ -121,10 +121,10 @@ html[data-theme="light"][data-palette="orange"] {
   --accent-strong: #b76a1e;
   --accent-soft: #f9ead6;
 }
-html[data-theme="light"][data-palette="gray"] {
-  --accent: #5a6170;
-  --accent-strong: #474d59;
-  --accent-soft: #eceef2;
+html[data-theme="light"][data-palette="sakura"] {
+  --accent: #d65a8a;
+  --accent-strong: #b84770;
+  --accent-soft: #fce6ee;
 }
 
 /* ── Reset ────────────────────────────────────────────── */
@@ -451,7 +451,7 @@ body {
   flex: 1;
   min-height: 0;
   display: grid;
-  grid-template-columns: 1fr 2px 1fr;
+  grid-template-columns: minmax(0, 1fr) 2px minmax(0, 1fr);
   gap: 0;
 }
 .panel {
@@ -672,9 +672,10 @@ body {
   background: var(--bg-elev);
   border: 1px dashed var(--border);
   border-radius: var(--radius-md);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: pre-wrap;
+  word-break: break-all;
+  overflow-y: auto;
+  height: 96px;
   line-height: 1.7;
   animation: preview-in 0.35s ease;
 }
