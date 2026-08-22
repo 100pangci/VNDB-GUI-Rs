@@ -182,6 +182,10 @@ jobs:
       - name: 创建 Release 并上传产物
         uses: softprops/action-gh-release@v2
         with:
+          # 显式指定 name，把 tag 中的版本号写进 Release 标题（不传时标题不带版本号）
+          name: VNDB-GUI ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}
+          fail_on_unmatched_files: true
           files: |
             artifacts/windows/vndb-gui-${{ github.ref_name }}-windows.exe
             artifacts/linux/vndb-gui-${{ github.ref_name }}-linux

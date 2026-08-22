@@ -3,6 +3,7 @@ import { computed, onMounted, onUnmounted, ref } from "vue";
 import ReleaseRow from "./components/ReleaseRow.vue";
 import CandidateDialog from "./components/CandidateDialog.vue";
 import CustomFormatDialog from "./components/CustomFormatDialog.vue";
+import ContextMenu from "./components/ContextMenu.vue";
 import {
   PALETTES,
   candidateState,
@@ -254,5 +255,7 @@ onUnmounted(() => {
       @save="(t, n) => { onFormatSaved(t, n); formatOpen = false; }"
       @cancel="formatOpen = false"
     />
+
+    <ContextMenu />
   </div>
 </template>
