@@ -79,7 +79,7 @@ jobs:
 
       - name: 重命名为规范格式
         shell: cmd
-        run: move "release\VNDB-GUI.exe" "vndb-gui-${{ github.ref_name }}-windows.exe"
+        run: move "release\VNDB-GUI-%VNDB_GUI_VERSION%.exe" "vndb-gui-${{ github.ref_name }}-windows.exe"
 
       - name: 上传 Windows 构建产物
         uses: actions/upload-artifact@v4
@@ -123,7 +123,7 @@ jobs:
           ./build_gui_linux.sh
 
       - name: 重命名为规范格式
-        run: mv release/VNDB-GUI vndb-gui-${{ github.ref_name }}-linux
+        run: mv "release/VNDB-GUI-${VNDB_GUI_VERSION}" "vndb-gui-${{ github.ref_name }}-linux"
 
       - name: 上传 Linux 构建产物
         uses: actions/upload-artifact@v4
