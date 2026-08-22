@@ -53,6 +53,8 @@ jobs:
     env:
       # 注入 tag 版本号（v1.0.3），前端标题与应用元数据自动跟随
       APP_VERSION: ${{ github.ref_name }}
+      # Rust 端窗口标题版本（app_version.rs 编译期读取）
+      VNDB_GUI_VERSION: ${{ github.ref_name }}
 
     steps:
       - name: 拉取代码
@@ -92,6 +94,7 @@ jobs:
     needs: test
     env:
       APP_VERSION: ${{ github.ref_name }}
+      VNDB_GUI_VERSION: ${{ github.ref_name }}
 
     steps:
       - name: 拉取代码
@@ -135,6 +138,7 @@ jobs:
     needs: test
     env:
       APP_VERSION: ${{ github.ref_name }}
+      VNDB_GUI_VERSION: ${{ github.ref_name }}
 
     steps:
       - name: 拉取代码

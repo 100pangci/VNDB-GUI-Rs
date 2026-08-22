@@ -50,8 +50,9 @@ pub fn run() {
         })
         .setup(|app| {
             let version = app_version::get_app_version();
+            let version = version.trim_start_matches('v');
             if let Some(win) = app.get_webview_window("main") {
-                let _ = win.set_title(&format!("VNDB 文件名生成器 — {version}"));
+                let _ = win.set_title(&format!("VNDB 文件名生成器 v{version}"));
             }
             Ok(())
         })
