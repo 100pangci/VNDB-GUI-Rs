@@ -18,7 +18,6 @@ export const DEFAULT_FORMAT_TEMPLATE =
   "[{developer}][{date}]{title}[{vid}][{platform}][{group}][{patch_date}][{language}]";
 export const DEFAULT_TEMPLATE_NAME = "默认模板";
 export const PROJECT_URL = "https://github.com/100pangci/VNDB-GUI-Rs";
-export const APP_VERSION = "1.0.1";
 
 export interface FormatTemplate {
   name: string;

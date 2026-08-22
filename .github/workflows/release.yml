@@ -50,6 +50,9 @@ jobs:
     runs-on: windows-latest
     if: startsWith(github.ref, 'refs/tags/v')
     needs: test
+    env:
+      # 注入 tag 版本号（v1.0.3），前端标题与应用元数据自动跟随
+      APP_VERSION: ${{ github.ref_name }}
 
     steps:
       - name: 拉取代码
@@ -63,6 +66,10 @@ jobs:
 
       - name: 配置 Rust
         uses: dtolnay/rust-toolchain@stable
+
+      - name: 从 tag 同步应用版本号
+        shell: bash
+        run: node -e "const fs=require('fs');const f='src-tauri/tauri.conf.json';const j=JSON.parse(fs.readFileSync(f,'utf8'));j.version=process.env.APP_VERSION.replace(/^v/,'');fs.writeFileSync(f,JSON.stringify(j,null,2)+'\n')"
 
       - name: 运行 Windows 打包脚本
         shell: cmd
@@ -83,6 +90,8 @@ jobs:
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
     needs: test
+    env:
+      APP_VERSION: ${{ github.ref_name }}
 
     steps:
       - name: 拉取代码
@@ -101,6 +110,9 @@ jobs:
 
       - name: 配置 Rust
         uses: dtolnay/rust-toolchain@stable
+
+      - name: 从 tag 同步应用版本号
+        run: node -e "const fs=require('fs');const f='src-tauri/tauri.conf.json';const j=JSON.parse(fs.readFileSync(f,'utf8'));j.version=process.env.APP_VERSION.replace(/^v/,'');fs.writeFileSync(f,JSON.stringify(j,null,2)+'\n')"
 
       - name: 运行 Linux 打包脚本
         run: |
@@ -121,6 +133,8 @@ jobs:
     runs-on: macos-latest
     if: startsWith(github.ref, 'refs/tags/v')
     needs: test
+    env:
+      APP_VERSION: ${{ github.ref_name }}
 
     steps:
       - name: 拉取代码
@@ -134,6 +148,9 @@ jobs:
 
       - name: 配置 Rust
         uses: dtolnay/rust-toolchain@stable
+
+      - name: 从 tag 同步应用版本号
+        run: node -e "const fs=require('fs');const f='src-tauri/tauri.conf.json';const j=JSON.parse(fs.readFileSync(f,'utf8'));j.version=process.env.APP_VERSION.replace(/^v/,'');fs.writeFileSync(f,JSON.stringify(j,null,2)+'\n')"
 
       - name: 安装依赖
         run: npm ci --no-audit --no-fund
