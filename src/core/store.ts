@@ -5,11 +5,15 @@ import type { VNCandidate, VNInfo, VNRelease } from "./models";
 import { PLACEHOLDER } from "./models";
 import {
   formatReleased,
+  hasNonChineseLanguage,
   isChineseRelease,
   languageLabel,
+  languageTagString,
+  mergeLanguageTag,
   nonDeveloperGroupName,
   nonZhSortKey,
   originalTitle,
+  zhLanguageTagString,
   zhSortKey,
 } from "./vndb";
 import { generateCustomFilename, generateFilename, sanitizeFilename } from "./filename";
@@ -81,6 +85,7 @@ export const state = reactive({
 
   useReleaseTitle: false,
   sanitizeEnabled: true,
+  mergeLanguages: false,
 
   themeMode: "System" as ThemeMode,
   palette: "default",
@@ -162,15 +167,57 @@ export const activeFormat = computed<FormatTemplate | null>(
 
 export const savedFormat = computed<string>(() => activeFormat.value?.template ?? "");
 
+export const nonZhRelease = computed<VNRelease | null>(
+  () => state.nonZh[state.selectedNonzhIdx] ?? null,
+);
+
+export const zhRelease = computed<VNRelease | null>(
+  () => state.zh[state.selectedZhIdx] ?? null,
+);
+
+export const canMergeLanguages = computed<boolean>(
+  () =>
+    !!state.vnInfo &&
+    !!nonZhRelease.value &&
+    !!zhRelease.value &&
+    nonZhRelease.value.id === zhRelease.value.id,
+);
+
+function sideLanguageTag(release: VNRelease | null): string {
+  if (!release) return state.language;
+  if (state.mergeLanguages && canMergeLanguages.value) {
+    return mergeLanguageTag(nonZhRelease.value!, zhRelease.value!);
+  }
+  const tag =
+    state.focusSide === "zh"
+      ? zhLanguageTagString(release)
+      : languageTagString(release, true);
+  return tag === PLACEHOLDER ? state.language : tag;
+}
+
+export function toggleMergeLanguages() {
+  state.mergeLanguages = !state.mergeLanguages;
+}
+
+watch(
+  () => [state.selectedNonzhIdx, state.selectedZhIdx, state.vnInfo],
+  () => {
+    if (state.mergeLanguages && !canMergeLanguages.value) {
+      state.mergeLanguages = false;
+    }
+  },
+);
+
 export const previewFilename = computed<string>(() => {
   if (!state.vnInfo) return "";
   const base = baseRelease.value;
   if (!base) return "";
+  const langTag = sideLanguageTag(activeRelease.value);
   if (savedFormat.value) {
     return generateCustomFilename(savedFormat.value, state.vnInfo, base, {
       groupName: state.groupName,
       patchDate: state.patchDate,
-      language: state.language,
+      language: langTag,
       useReleaseTitle: state.useReleaseTitle,
       sanitizeEnabled: state.sanitizeEnabled,
       activeRelease: activeRelease.value,
@@ -179,7 +226,7 @@ export const previewFilename = computed<string>(() => {
   return generateFilename(state.vnInfo, base, {
     groupName: state.groupName,
     patchDate: state.patchDate,
-    language: state.language,
+    language: langTag,
     useReleaseTitle: state.useReleaseTitle,
     sanitize: state.sanitizeEnabled,
   });
@@ -263,7 +310,7 @@ export function selectPalette(id: string) {
 function applyVn(vn: VNInfo) {
   state.vnInfo = vn;
   state.allReleases = vn.releases;
-  state.nonZh = state.allReleases.filter((r) => !isChineseRelease(r));
+  state.nonZh = state.allReleases.filter((r) => hasNonChineseLanguage(r));
   state.zh = state.allReleases.filter((r) => isChineseRelease(r));
 
   state.nonZh.sort((a, b) => {

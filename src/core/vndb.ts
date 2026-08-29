@@ -110,6 +110,10 @@ export function isChineseRelease(r: VNRelease): boolean {
   return r.languages.some((l) => l === "zh-Hans" || l === "zh-Hant" || l === "zh");
 }
 
+export function hasNonChineseLanguage(r: VNRelease): boolean {
+  return r.languages.some((l) => l !== "zh-Hans" && l !== "zh-Hant" && l !== "zh");
+}
+
 export function nonZhSortKey(r: VNRelease): [number, number, number] {
   const hasJa = r.languages.includes("ja");
   const hasEn = r.languages.includes("en");
@@ -123,9 +127,51 @@ export function zhSortKey(r: VNRelease): [number, number] {
   return [date === 0 ? 1 : 0, -date];
 }
 
+const ZH_LABEL: Record<string, string> = {
+  "zh-Hans": "CHS",
+  zh: "CHS",
+  "zh-Hant": "CHT",
+};
+
+function zhTagOf(lang: string): string | null {
+  return ZH_LABEL[lang] ?? null;
+}
+
+export function languageTags(r: VNRelease, excludeChinese = false): string[] {
+  const tags: string[] = [];
+  for (const l of r.languages) {
+    if (excludeChinese && zhTagOf(l)) continue;
+    const tag = zhTagOf(l) ?? l.toUpperCase();
+    if (!tags.includes(tag)) tags.push(tag);
+  }
+  return tags;
+}
+
+export function languageTagString(r: VNRelease, excludeChinese = false): string {
+  const tags = languageTags(r, excludeChinese);
+  return tags.length ? tags.join("&") : PLACEHOLDER;
+}
+
+export function zhLanguageTagString(r: VNRelease): string {
+  const tags: string[] = [];
+  for (const l of r.languages) {
+    const tag = zhTagOf(l);
+    if (tag && !tags.includes(tag)) tags.push(tag);
+  }
+  return tags.length ? tags.join("&") : PLACEHOLDER;
+}
+
+export function mergeLanguageTag(nonZh: VNRelease, zh: VNRelease): string {
+  const tags: string[] = [];
+  for (const t of [
+    ...languageTags(nonZh, true),
+    ...zhLanguageTagString(zh).split("&").filter((t) => t && t !== PLACEHOLDER),
+  ]) {
+    if (!tags.includes(t)) tags.push(t);
+  }
+  return tags.length ? tags.join("&") : PLACEHOLDER;
+}
+
 export function languageLabel(r: VNRelease): string {
-  if (r.languages.includes("zh-Hans")) return "CHS";
-  if (r.languages.includes("zh-Hant")) return "CHT";
-  if (r.languages.includes("zh")) return "CHS";
-  return r.languages.length ? r.languages[0].toUpperCase() : "CHS";
+  return languageTags(r)[0] ?? "CHS";
 }

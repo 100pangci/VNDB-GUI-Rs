@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from "vue";
+import { computed, nextTick, onMounted, onUnmounted, ref, watch, type Ref } from "vue";
 import ReleaseRow from "./components/ReleaseRow.vue";
 import CandidateDialog from "./components/CandidateDialog.vue";
 import CustomFormatDialog from "./components/CustomFormatDialog.vue";
 import ContextMenu from "./components/ContextMenu.vue";
 import {
   PALETTES,
+  canMergeLanguages,
   candidateState,
   cancelCandidates,
   chooseCandidate,
@@ -30,6 +31,9 @@ import {
 const formatOpen = ref(false);
 const paletteOpen = ref(false);
 const copiedBtn = ref<"copy" | "simple" | null>(null);
+const flashNonZhId = ref<string | null>(null);
+const flashZhId = ref<string | null>(null);
+let flashTimer: ReturnType<typeof setTimeout> | null = null;
 let copyTimer: ReturnType<typeof setTimeout> | null = null;
 const PROJECT_URL = "https://github.com/100pangci/VNDB-GUI-Rs";
 
@@ -50,6 +54,61 @@ const previewText = computed(() => {
 });
 
 const statusClass = computed(() => `status status-${state.statusKind}`);
+
+const linkedNonZhId = computed<string | null>(() => {
+  if (!state.zh.length) return null;
+  const zhSel = state.zh[state.selectedZhIdx];
+  if (!zhSel) return null;
+  return state.nonZh.find((r) => r.id === zhSel.id)?.id ?? null;
+});
+
+const linkedZhId = computed<string | null>(() => {
+  if (!state.nonZh.length) return null;
+  const nonZhSel = state.nonZh[state.selectedNonzhIdx];
+  if (!nonZhSel) return null;
+  return state.zh.find((r) => r.id === nonZhSel.id)?.id ?? null;
+});
+
+function scrollListTo(listEl: HTMLElement | null, targetId: string | null) {
+  if (!listEl || !targetId) return;
+  const rows = listEl.querySelectorAll<HTMLElement>(".release-row");
+  for (const row of rows) {
+    if (row.dataset.id === targetId) {
+      listEl.scrollTo({ top: row.offsetTop - listEl.clientHeight / 2, behavior: "smooth" });
+      break;
+    }
+  }
+}
+
+function flashAndScroll(
+  listSel: string,
+  flashRef: Ref<string | null>,
+  targetId: string | null,
+) {
+  if (!targetId) return;
+  const listEl = document.querySelector<HTMLElement>(listSel);
+  scrollListTo(listEl, targetId);
+  flashRef.value = targetId;
+  if (flashTimer) clearTimeout(flashTimer);
+  flashTimer = setTimeout(() => {
+    flashRef.value = null;
+  }, 1600);
+}
+
+watch(
+  () => [state.selectedZhIdx, state.zh],
+  async () => {
+    await nextTick();
+    flashAndScroll(".release-list.nonzh-list", flashNonZhId, linkedNonZhId.value);
+  },
+);
+watch(
+  () => [state.selectedNonzhIdx, state.nonZh],
+  async () => {
+    await nextTick();
+    flashAndScroll(".release-list.zh-list", flashZhId, linkedZhId.value);
+  },
+);
 
 function setTitleMode(useRelease: boolean) {
   state.useReleaseTitle = useRelease;
@@ -146,14 +205,16 @@ onUnmounted(() => {
     <section class="panels">
       <div class="panel">
         <div class="panel-header nonzh-header">非中文发行</div>
-        <TransitionGroup tag="div" name="row" class="release-list">
+        <TransitionGroup tag="div" name="row" class="release-list nonzh-list">
           <ReleaseRow
             v-for="(r, i) in state.nonZh"
             :key="r.id"
             :style="{ animationDelay: `${Math.min(i, 10) * 22}ms` }"
             :release="r"
             :selected="i === state.selectedNonzhIdx"
+            :flash="r.id === flashNonZhId"
             :zh="false"
+            :data-id="r.id"
             @click="selectNonZh(i)"
           />
           <div v-if="!state.nonZh.length" key="empty" class="empty-hint">（无发行版本）</div>
@@ -165,14 +226,16 @@ onUnmounted(() => {
 
       <div class="panel zh-panel">
         <div class="panel-header zh-header">中文发行</div>
-        <TransitionGroup tag="div" name="row" class="release-list">
+        <TransitionGroup tag="div" name="row" class="release-list zh-list">
           <ReleaseRow
             v-for="(r, i) in state.zh"
             :key="r.id"
             :style="{ animationDelay: `${Math.min(i, 10) * 22}ms` }"
             :release="r"
             :selected="i === state.selectedZhIdx"
+            :flash="r.id === flashZhId"
             :zh="true"
+            :data-id="r.id"
             @click="selectZh(i)"
           />
           <div v-if="!state.zh.length" key="empty" class="empty-hint">（无中文版本）</div>
@@ -217,6 +280,11 @@ onUnmounted(() => {
       <div class="preview-top">
         <div class="preview-title">文件名预览</div>
         <button class="btn link-btn" :class="{ waiting: linkState.waiting }" @click="onLinkClick">{{ linkState.text }}</button>
+        <label v-if="canMergeLanguages" class="switch">
+          <input v-model="state.mergeLanguages" type="checkbox" />
+          <span class="track"><span class="thumb"></span></span>
+          <span class="switch-label">合并语言标签</span>
+        </label>
         <label class="switch">
           <input v-model="state.sanitizeEnabled" type="checkbox" />
           <span class="track"><span class="thumb"></span></span>

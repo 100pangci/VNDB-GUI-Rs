@@ -69,6 +69,17 @@ describe("generateFilename", () => {
     );
   });
 
+  it("双中文版本语言显示 CHS&CHT", () => {
+    const dual: VNRelease = { ...release, languages: ["zh-Hans", "zh-Hant"] };
+    expect(generateFilename(vn, dual, { language: "CHS&CHT" })).toContain("[CHS&CHT]");
+  });
+
+  it("语言参数为多语言标签时按原样输出", () => {
+    const cross: VNRelease = { ...release, languages: ["en", "zh-Hans", "zh-Hant"] };
+    expect(generateFilename(vn, cross, { language: "CHS&CHT" })).toContain("[CHS&CHT]");
+    expect(generateFilename(vn, cross, { language: "EN" })).toContain("[EN]");
+  });
+
   it("关闭替换后保留非法字符", () => {
     const dirty: VNRelease = { ...release, alttitle: "A:B" };
     expect(generateFilename(vn, dirty, { useReleaseTitle: true, sanitize: false })).toContain(

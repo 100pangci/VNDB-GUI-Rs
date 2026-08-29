@@ -3,9 +3,13 @@ import { PLACEHOLDER } from "./models";
 import {
   developerName,
   formatReleased,
+  hasNonChineseLanguage,
   isChineseRelease,
   languageLabel,
+  languageTags,
+  languageTagString,
   languagesDisplay,
+  mergeLanguageTag,
   nonDeveloperGroupName,
   nonZhSortKey,
   originalTitle,
@@ -14,6 +18,7 @@ import {
   producerDisplayName,
   publisherName,
   releaseDisplayTitle,
+  zhLanguageTagString,
   zhSortKey,
 } from "./vndb";
 import type { VNInfo, VNRelease } from "./models";
@@ -145,6 +150,26 @@ describe("isChineseRelease", () => {
   ])("语言 %s → %s", (lang, expected) => {
     expect(isChineseRelease({ ...release, languages: [lang] })).toBe(expected);
   });
+
+  it("含中文即视为中文发行", () => {
+    expect(isChineseRelease({ ...release, languages: ["en", "zh-Hans"] })).toBe(true);
+  });
+});
+
+describe("hasNonChineseLanguage", () => {
+  it.each([
+    ["ja", true],
+    ["en", true],
+    ["zh-Hans", false],
+    ["zh-Hant", false],
+    ["zh", false],
+  ])("语言 %s → %s", (lang, expected) => {
+    expect(hasNonChineseLanguage({ ...release, languages: [lang] })).toBe(expected);
+  });
+
+  it("含非中文即视为非中文发行", () => {
+    expect(hasNonChineseLanguage({ ...release, languages: ["zh-Hans", "en"] })).toBe(true);
+  });
 });
 
 describe("排序键", () => {
@@ -175,11 +200,81 @@ describe("languageLabel", () => {
     expect(languageLabel({ ...release, languages: ["zh"] })).toBe("CHS");
   });
 
+  it("双中文语言取 CHS 在前", () => {
+    expect(languageLabel({ ...release, languages: ["zh-Hans", "zh-Hant"] })).toBe("CHS");
+  });
+
   it("其他语言取第一个并大写", () => {
     expect(languageLabel({ ...release, languages: ["ja"] })).toBe("JA");
   });
 
   it("无语言默认 CHS", () => {
     expect(languageLabel({ ...release, languages: [] })).toBe("CHS");
+  });
+});
+
+describe("languageTags / languageTagString", () => {
+  it("中文语言映射为 CHS / CHT", () => {
+    expect(languageTagString({ ...release, languages: ["zh-Hans", "zh-Hant"] })).toBe("CHS&CHT");
+  });
+
+  it("非中文语言大写并用 & 连接", () => {
+    expect(languageTagString({ ...release, languages: ["ja", "en"] })).toBe("JA&EN");
+  });
+
+  it("excludeChinese 排除中文语言", () => {
+    expect(languageTagString({ ...release, languages: ["zh-Hans", "zh-Hant", "ja", "en"] }, true)).toBe("JA&EN");
+    expect(languageTags({ ...release, languages: ["zh-Hans", "en"] }, true)).toEqual(["EN"]);
+  });
+
+  it("全部语言被排除或无语言时返回 NO DATA", () => {
+    expect(languageTagString({ ...release, languages: ["zh-Hans"] }, true)).toBe(PLACEHOLDER);
+    expect(languageTagString({ ...release, languages: [] })).toBe(PLACEHOLDER);
+  });
+
+  it("去重重复语言", () => {
+    expect(languageTagString({ ...release, languages: ["ja", "ja", "en"] })).toBe("JA&EN");
+  });
+});
+
+describe("zhLanguageTagString", () => {
+  it("只取中文语言标签", () => {
+    expect(zhLanguageTagString({ ...release, languages: ["zh-Hans", "zh-Hant", "en", "ja"] })).toBe(
+      "CHS&CHT",
+    );
+  });
+
+  it("无中文时返回 NO DATA", () => {
+    expect(zhLanguageTagString({ ...release, languages: ["en", "ja"] })).toBe(PLACEHOLDER);
+  });
+});
+
+describe("mergeLanguageTag", () => {
+  const nonZh = { ...release, languages: ["en", "zh-Hans", "zh-Hant"] };
+  const zh = { ...release, languages: ["en", "zh-Hans", "zh-Hant"] };
+
+  it("同条目左右语言标签合并去重", () => {
+    expect(mergeLanguageTag(nonZh, zh)).toBe("EN&CHS&CHT");
+  });
+
+  it("左侧为英文、右侧为双中文", () => {
+    expect(mergeLanguageTag({ ...release, languages: ["en"] }, { ...release, languages: ["zh-Hans", "zh-Hant"] })).toBe(
+      "EN&CHS&CHT",
+    );
+  });
+
+  it("合并结果与顺序无关（去重）", () => {
+    expect(
+      mergeLanguageTag(
+        { ...release, languages: ["en", "ja"] },
+        { ...release, languages: ["zh-Hans", "zh-Hant", "en"] },
+      ),
+    ).toBe("EN&JA&CHS&CHT");
+  });
+
+  it("无语言时返回 NO DATA", () => {
+    expect(mergeLanguageTag({ ...release, languages: [] }, { ...release, languages: [] })).toBe(
+      PLACEHOLDER,
+    );
   });
 });

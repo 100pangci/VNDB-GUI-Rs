@@ -509,6 +509,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  position: relative;
 }
 .empty-hint {
   padding: 24px 0;
