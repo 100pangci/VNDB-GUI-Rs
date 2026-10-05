@@ -57,6 +57,22 @@
 - [Node.js](https://nodejs.org/) 18+
 - Windows 需 [WebView2](https://developer.microsoft.com/microsoft-edge/webview2/)（Win11 自带）
 
+### Linux / Wayland 启动兼容
+
+Linux 版本默认设置进程级 `WEBKIT_DISABLE_DMABUF_RENDERER=1`，规避部分
+Wayland / NVIDIA 环境下 WebKitGTK 渲染导致的
+`Error 71 (协议错误) dispatching to Wayland display`。不改变系统配置，
+也不强制切换到 X11；已显式设置该变量时保留原值。
+
+旧版（如 v1.0.4）可这样启动：
+
+```bash
+WEBKIT_DISABLE_DMABUF_RENDERER=1 ./vndb-gui-v1.0.4-linux
+```
+
+如需在新版中恢复 DMA-BUF 渲染，可显式设置 `WEBKIT_DISABLE_DMABUF_RENDERER=0`。
+源码修复需重新编译后生效，已下载的旧版二进制不会自动改变。
+
 ### 运行（开发模式）
 
 ```bash

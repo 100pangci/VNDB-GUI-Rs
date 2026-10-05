@@ -1,5 +1,7 @@
 mod app_version;
 mod config;
+#[cfg(target_os = "linux")]
+mod linux_compat;
 mod vndb;
 
 use config::AppConfig;
@@ -43,6 +45,10 @@ fn open_url(url: String) -> Result<(), String> {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    // Configure WebKit before Tauri initializes GTK or starts worker threads.
+    #[cfg(target_os = "linux")]
+    linux_compat::configure();
+
     tauri::Builder::default()
         .plugin(tauri_plugin_clipboard_manager::init())
         .manage(AppState {
